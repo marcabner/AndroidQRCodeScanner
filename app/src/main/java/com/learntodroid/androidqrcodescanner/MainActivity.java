@@ -50,12 +50,15 @@ public class MainActivity extends AppCompatActivity {
         previewView = findViewById(R.id.activity_main_previewView);
 
         qrCodeFoundButton = findViewById(R.id.activity_main_qrCodeFoundButton);
-        qrCodeFoundButton.setVisibility(View.INVISIBLE);
+        qrCodeFoundButton.setVisibility(View.VISIBLE);
+        qrCodeFoundButton.setText("RESET");
         qrCodeFoundButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Toast.makeText(getApplicationContext(), qrCode, Toast.LENGTH_SHORT).show();*/
                 Log.i(MainActivity.class.getSimpleName(), "QR Code Found: " + qrCode);
+                qrCode = "";
+                qrCodeFoundButton.setText("RESET");
+                Toast.makeText(getApplicationContext(), "CLEAN MEMORY!", Toast.LENGTH_SHORT).show();
             }
         });
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -117,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new QRCodeImageAnalyzer(new QRCodeFoundListener() {
             @Override
             public void onQRCodeFound(String _qrCode) {
-                if(!qrCode.equals(_qrCode)) {
+                if(!qrCode.equals(_qrCode) && _qrCode.contains("https://invitationcap.azurewebsites.net/index.jsp")) {
                     qrCode = _qrCode;
                     /*qrCodeFoundButton.setVisibility(View.VISIBLE); Ya NO SE MUESTRA el botón*/
                     Long idEmployees = getIdEmployees(qrCode);
@@ -128,16 +131,14 @@ public class MainActivity extends AppCompatActivity {
                         public void onResponse(String response) {
                             try {
                                 JSONObject jsonObject = new JSONObject(response);
-                                String error_nombre = jsonObject.getString("nombre");
+                                Long error_idempleado = jsonObject.getLong("idempleado");
                                 Long error_idemployees = jsonObject.getLong("idemployees");
-                                if("ERROR_YA_ESTA_REGISTRADO".equals(error_nombre) || 0L == error_idemployees ) {
-                                    Toast.makeText(getApplicationContext(), error_nombre, Toast.LENGTH_SHORT).show();
+                                String nombre = jsonObject.getString("nombre");
+                                if(0L == error_idemployees || 0L == error_idempleado) {
+                                    Toast.makeText(getApplicationContext(), "ERROR:" + nombre + " YA ESTA REGISTRADO", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "¡Bienvenido "+ error_nombre + "!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "¡Bienvenido "+ nombre + "!", Toast.LENGTH_SHORT).show();
                                 }
-                                qrCodeFoundButton.setText(jsonObject.toString());
-                                qrCodeFoundButton.setBackgroundColor(255);
-                                qrCodeFoundButton.setVisibility(View.VISIBLE);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -146,15 +147,20 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Log.e("error", error.getMessage());
+                            Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
                     Volley.newRequestQueue(getApplicationContext()).add(strRequest);
+                } else if(!qrCode.equals(_qrCode)) {
+                    qrCode = _qrCode;
+                    Toast.makeText(getApplicationContext(), _qrCode, Toast.LENGTH_SHORT).show();
+                } else {
+                    qrCodeFoundButton.setText("RESET NOW!");
                 }
             }
 
             @Override
             public void qrCodeNotFound() {
-                qrCodeFoundButton.setVisibility(View.INVISIBLE);
                 Toast.makeText(getApplicationContext(), qrCode, Toast.LENGTH_SHORT).cancel();
             }
         }));
