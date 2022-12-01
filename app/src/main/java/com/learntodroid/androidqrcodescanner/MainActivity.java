@@ -134,10 +134,11 @@ public class MainActivity extends AppCompatActivity {
                                 Long error_idempleado = jsonObject.getLong("idempleado");
                                 Long error_idemployees = jsonObject.getLong("idemployees");
                                 String nombre = jsonObject.getString("nombre");
+                                String sede = jsonObject.getString("sede");
                                 if(0L == error_idemployees || 0L == error_idempleado) {
-                                    Toast.makeText(getApplicationContext(), "ERROR:" + nombre + " YA ESTA REGISTRADO", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "ERROR: " + nombre + " YA ESTA REGISTRADO EN LA SEDE " + sede, Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "¡Bienvenido "+ nombre + "!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "¡Bienvenido " + nombre + "! :) TU SEDE ES " + sede, Toast.LENGTH_SHORT).show();
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
